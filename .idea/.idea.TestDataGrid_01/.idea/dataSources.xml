@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="TEST_FILE.db" uuid="f117f467-935a-411f-9a89-7238025e27c3">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:F:\NGT TOOL B5\TestDataGrid_01\TestDataGrid_01\bin\Debug\net6.0-windows\TEST_FILE\TEST_FILE.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="TEST_FILE.db [2]" uuid="044a784a-a110-42a8-93b9-822f0eb38d68">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:F:\NGT TOOL B5\TestDataGrid_01\TestDataGrid_01\bin\Debug\net6.0-windows\TEST_FILE\TEST_FILE.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+  </component>
+</project>
