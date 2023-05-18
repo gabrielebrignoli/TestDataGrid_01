@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
-using TestDataGrid_01.CustomDataGridCell;
 using Paragraph = System.Windows.Documents.Paragraph;
 using Run = System.Windows.Documents.Run;
 
@@ -30,121 +29,132 @@ public static class Visualizzatore_XLIFF
         }
         return xamlString;
     }
-
-
+    
     public static Paragraph ConvertStringToParagraph(string content)
     {
         var openTags = new Dictionary<int, (string Tag, string Value)>();
         var paragraph = new Paragraph();
-
-        var matches = Regex.Matches(content, @"(<bpt id=""(?<bpt_id>\d+)"" ctype=""(?<tag_attribute>.*?)""(?:\s(?<attribute_value>.*?)=""(?<value>.*?)"")?>\{\}</bpt>)|(<ept id=""(?<ept_id>\d+)"">\{\}</ept>)|(?<text>(?:[^<>]|&lt;|&gt;)+)");
-        foreach (Match match in matches)
+        if (string.IsNullOrEmpty(content))
         {
-            if (match.Groups["bpt_id"].Success) // opening tag
+            return paragraph;
+        }
+        else
+        {
+            var matches = Regex.Matches(content,
+                @"(<bpt id=""(?<bpt_id>\d+)"" ctype=""(?<tag_attribute>.*?)""(?:\s(?<attribute_value>.*?)=""(?<value>.*?)"")?>\{\}</bpt>)|(<ept id=""(?<ept_id>\d+)"">\{\}</ept>)|(?<text>(?:[^<>]|&lt;|&gt;)+)");
+            foreach (Match match in matches)
             {
-                var tagId = int.Parse(match.Groups["bpt_id"].Value);
-                var formattingAttribute = match.Groups["tag_attribute"].Value;
-                var tagValue = match.Groups["value"].Success ? match.Groups["value"].Value : null;
-                openTags[tagId] = (formattingAttribute, tagValue);
-            }
-            else if (match.Groups["ept_id"].Success) // closing tag
-            {
-                var tagId = int.Parse(match.Groups["ept_id"].Value);
-                if (openTags.ContainsKey(tagId))
+                if (match.Groups["bpt_id"].Success) // opening tag
                 {
-                    openTags.Remove(tagId);
+                    var tagId = int.Parse(match.Groups["bpt_id"].Value);
+                    var formattingAttribute = match.Groups["tag_attribute"].Value;
+                    var tagValue = match.Groups["value"].Success ? match.Groups["value"].Value : null;
+                    openTags[tagId] = (formattingAttribute, tagValue);
                 }
-                else
+                else if (match.Groups["ept_id"].Success) // closing tag
                 {
-                    throw new InvalidOperationException("Mismatched closing tag encountered.");
-                }
-            }
-            else // plain text
-            {
-                var run = new Run();
-
-                var text = match.Groups["text"].Value;
-
-                Span span = new Span(run);
-
-                run.Text = WebUtility.HtmlDecode(text);
-
-                foreach (var (_, (tag, value)) in openTags)
-                {
-                    switch (tag)
+                    var tagId = int.Parse(match.Groups["ept_id"].Value);
+                    if (openTags.ContainsKey(tagId))
                     {
-                        case "bold":
-                            run.FontWeight = FontWeights.Bold;
-                            break;
-                        case "italic":
-                            run.FontStyle = FontStyles.Italic;
-                            break;
-                        case "underline":
-                            run.TextDecorations = TextDecorations.Underline;
-                            break;
-                        case "underlined":
-                            run.TextDecorations = TextDecorations.Underline;
-                            break;
-                        case "fontsize":
-                            if (double.TryParse(value, out double fontSize))
-                            {
-                                run.FontSize = fontSize / 2; // The font size in DOCX is measured in half-points
-                            }
-                            break;
-                        case "fonttype":
-                            run.FontFamily = new FontFamily(value);
-                            break;
-                        case "superscript":
-                            run.BaselineAlignment = BaselineAlignment.TextTop;
-                            run.FontSize *= 0.65;
-                            break;
-                        case "x-sup":
-                            run.BaselineAlignment = BaselineAlignment.TextTop;
-                            run.FontSize *= 0.65;
-                            break;
-                        case "subscript":
-                            run.BaselineAlignment = BaselineAlignment.Subscript;
-                            run.FontSize *= 0.65;
-                            break;
-                        case "x-sub":
-                            run.BaselineAlignment = BaselineAlignment.Subscript;
-                            run.FontSize *= 0.65;
-                            break;
-                        case "coloredtext":
-                            run.Foreground = (SolidColorBrush)new BrushConverter().ConvertFromString($"#{value}");
-                            break;
-                        case "highlightedtext":
-                            run.Background = (SolidColorBrush)new BrushConverter().ConvertFromString(WmlToXamlColorConverter.Convert(value));
-                            break;
-                        case "hiddentext":
-                            run.Foreground = new SolidColorBrush(Colors.LightGray);
-                            break;
-                        case "image":
-                            var imageNameRegex = new Regex(@"[^\s]*_image_\d+\.[^<]*");
-                            var imageNameMatch = imageNameRegex.Match(text);
-
-                            if (imageNameMatch.Success)
-                            {
-                                int imageNumber = ExtractImageNumber(imageNameMatch.Value);
-                                run.Text = run.Text.Replace(imageNameMatch.Value, "");
-                                var imagePlaceholder = new CellaRichTextBox.NonEditableRun($"[Img. {imageNumber}]")
-                                {
-                                    FontWeight = FontWeights.Bold,
-                                    Background = new SolidColorBrush(Color.FromArgb(128, 255, 165, 0)),
-                                };
-                                paragraph.Inlines.Add(imagePlaceholder);
-                            }
-                            break;
-                        default:
-                            throw new InvalidOperationException($"Unknown formatting attribute: {tag}");
+                        openTags.Remove(tagId);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Mismatched closing tag encountered.");
                     }
                 }
-                paragraph.Inlines.Add(run);
+                else // plain text
+                {
+                    var run = new Run();
+
+                    var text = match.Groups["text"].Value;
+
+                    Span span = new Span(run);
+
+                    run.Text = WebUtility.HtmlDecode(text);
+
+                    foreach (var (_, (tag, value)) in openTags)
+                    {
+                        switch (tag)
+                        {
+                            case "bold":
+                                run.FontWeight = FontWeights.Bold;
+                                break;
+                            case "italic":
+                                run.FontStyle = FontStyles.Italic;
+                                break;
+                            case "underline":
+                                run.TextDecorations = TextDecorations.Underline;
+                                break;
+                            case "underlined":
+                                run.TextDecorations = TextDecorations.Underline;
+                                break;
+                            case "fontsize":
+                                if (double.TryParse(value, out double fontSize))
+                                {
+                                    run.FontSize = fontSize / 2; // The font size in DOCX is measured in half-points
+                                }
+
+                                break;
+                            case "fonttype":
+                                run.FontFamily = new FontFamily(value);
+                                break;
+                            case "superscript":
+                                run.BaselineAlignment = BaselineAlignment.TextTop;
+                                run.FontSize *= 0.65;
+                                break;
+                            case "x-sup":
+                                run.BaselineAlignment = BaselineAlignment.TextTop;
+                                run.FontSize *= 0.65;
+                                break;
+                            case "subscript":
+                                run.BaselineAlignment = BaselineAlignment.Subscript;
+                                run.FontSize *= 0.65;
+                                break;
+                            case "x-sub":
+                                run.BaselineAlignment = BaselineAlignment.Subscript;
+                                run.FontSize *= 0.65;
+                                break;
+                            case "coloredtext":
+                                run.Foreground = (SolidColorBrush)new BrushConverter().ConvertFromString($"#{value}");
+                                break;
+                            case "highlightedtext":
+                                run.Background =
+                                    (SolidColorBrush)new BrushConverter().ConvertFromString(
+                                        WmlToXamlColorConverter.Convert(value));
+                                break;
+                            case "hiddentext":
+                                run.Foreground = new SolidColorBrush(Colors.LightGray);
+                                break;
+                            case "image":
+                                var imageNameRegex = new Regex(@"[^\s]*_image_\d+\.[^<]*");
+                                var imageNameMatch = imageNameRegex.Match(text);
+
+                                if (imageNameMatch.Success)
+                                {
+                                    int imageNumber = ExtractImageNumber(imageNameMatch.Value);
+                                    run.Text = run.Text.Replace(imageNameMatch.Value, "");
+
+                                    var imagePlaceholder = Tag_helper_methods.CreateImagePlaceholder(imageNumber);
+                                    paragraph.Inlines.Add(new Run());
+                                    paragraph.Inlines.Add(imagePlaceholder);
+                                    paragraph.Inlines.Add(new Run());
+                                }
+
+                                break;
+                            default:
+                                throw new InvalidOperationException($"Unknown formatting attribute: {tag}");
+                        }
+                    }
+
+                    paragraph.Inlines.Add(run);
+                }
             }
         }
+
         return paragraph;
     }
-
+    
     public static FlowDocument ParagraphToFlowDocument(Paragraph paragraph)
     {
         FlowDocument flowDocument = new FlowDocument();

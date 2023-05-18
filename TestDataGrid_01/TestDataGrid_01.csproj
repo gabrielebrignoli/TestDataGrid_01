@@ -7,4 +7,34 @@
         <UseWPF>true</UseWPF>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Compile Remove="FlowDocumentColumn.cs" />
+      <Compile Remove="CustomDataGridCell\FlowDocumentCell.xaml.cs" />
+      <Compile Remove="CustomDataGridCell\TESTA.xaml.cs" />
+      <Compile Remove="Database\DatabaseCheck.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="CsvHelper" Version="30.0.1" />
+      <PackageReference Include="DocumentFormat.OpenXml" Version="3.0.0-ci0083" />
+      <PackageReference Include="MaterialDesignColors" Version="2.1.2" />
+      <PackageReference Include="MaterialDesignExtensions" Version="3.3.0" />
+      <PackageReference Include="MaterialDesignThemes" Version="4.8.0" />
+      <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0-preview.3.23174.2" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.5" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="7.0.5" />
+      <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.4" />
+      <PackageReference Include="syncfusion.ui.wpf.net" Version="21.1.35" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="DataModels\" />
+      <Folder Include="Loader Files\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Page Remove="CustomDataGridCell\FlowDocumentCell.xaml" />
+      <Page Remove="CustomDataGridCell\TESTA.xaml" />
+    </ItemGroup>
+
 </Project>
